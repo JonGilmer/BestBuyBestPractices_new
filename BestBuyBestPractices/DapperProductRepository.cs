@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Dapper;
 
 namespace BestBuyBestPractices
 {
@@ -14,14 +15,37 @@ namespace BestBuyBestPractices
             _connection = connection;
         }
 
-        public void CreateProduct(string name, double price, int categoryID)
+        // Writes to the database
+        public void CreateProduct(string newName, double newPrice, int newCategoryID)
         {
-            throw new NotImplementedException();
+            _connection.Execute("INSERT INTO products (Name, Price, CategoryID) VALUES (@productName, @price, @categoryID);",
+                new { productName = newName, price = newPrice, categoryID = newCategoryID });
         }
 
+        // Reads from the database
         public IEnumerable<products> GetAllProducts()
         {
-            throw new NotImplementedException();
+            return _connection.Query<products>("SELECT * FROM products;");
+        }
+
+        // Updates database
+        public void UpdateProductName(int productID, string updatedName)
+        {
+            _connection.Execute("UPDATE products SET Name = @updatedName WHERE ProductID = @productID;",
+                new { updatedName = updatedName, productID = productID });
+        }
+
+        // Deletes from database
+        public void DeleteProduct(int productID)
+        {
+            _connection.Execute("DELETE FROM reviews WHERE ProductID = @productID;",
+                new { productID = productID });
+
+            _connection.Execute("DELETE FROM sales WHERE ProductID = @productID;",
+                new { productID = productID });
+
+            _connection.Execute("DELETE FROM products WHERE ProductID = @productID;",
+                new { productID = productID });
         }
     }
 }
